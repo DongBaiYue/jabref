@@ -34,7 +34,7 @@ public class Crawler {
      */
     public Crawler(Path studyDefinitionFile, GitHandler gitHandler, FileUpdateMonitor fileUpdateMonitor, PreferencesService preferencesService, SavePreferences savePreferences, TimestampPreferences timestampPreferences, BibEntryTypesManager bibEntryTypesManager) throws IllegalArgumentException, IOException, ParseException, GitAPIException {
         Path studyRepositoryRoot = studyDefinitionFile.getParent();
-        studyRepository = new StudyRepository(studyRepositoryRoot, gitHandler, preferencesService, fileUpdateMonitor, savePreferences, timestampPreferences, bibEntryTypesManager);
+        studyRepository = new StudyRepository(studyRepositoryRoot, gitHandler, preferencesService, fileUpdateMonitor, bibEntryTypesManager);
         StudyDatabaseToFetcherConverter studyDatabaseToFetcherConverter = new StudyDatabaseToFetcherConverter(studyRepository.getActiveLibraryEntries(), preferencesService);
         this.studyFetcher = new StudyFetcher(studyDatabaseToFetcherConverter.getActiveFetchers(), studyRepository.getSearchQueryStrings());
     }

@@ -38,7 +38,7 @@ public class ChangeScanner {
 
             // Parse the modified file
             // Important: apply all post-load actions
-            ParserResult result = OpenDatabase.loadDatabase(database.getDatabasePath().get(), preferencesService, preferencesService.getTimestampPreferences(), new DummyFileUpdateMonitor());
+            ParserResult result = OpenDatabase.loadDatabase(database.getDatabasePath().get(), preferencesService, new DummyFileUpdateMonitor());
             BibDatabaseContext databaseOnDisk = result.getDatabaseContext();
 
             // Start looking at changes.

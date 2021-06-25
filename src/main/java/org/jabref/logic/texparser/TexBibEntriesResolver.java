@@ -39,7 +39,7 @@ public class TexBibEntriesResolver {
 
         // Preload databases from BIB files.
         Map<Path, BibDatabase> bibDatabases = resolverResult.getBibFiles().values().stream().distinct().collect(Collectors.toMap(
-                Function.identity(), path -> OpenDatabase.loadDatabase(path.toString(), preferencesService, timestampPreferences, fileMonitor).getDatabase()));
+                Function.identity(), path -> OpenDatabase.loadDatabase(path.toString(), preferencesService, fileMonitor).getDatabase()));
 
         // Get all pairs Entry<String entryKey, Citation>.
         Stream<Map.Entry<String, Citation>> citationsStream = latexParserResult.getCitations().entries().stream().distinct();

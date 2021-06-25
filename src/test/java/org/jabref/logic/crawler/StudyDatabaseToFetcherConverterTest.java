@@ -55,7 +55,7 @@ class StudyDatabaseToFetcherConverterTest {
         Path studyDefinition = tempRepositoryDirectory.resolve("study.yml");
         copyTestStudyDefinitionFileIntoDirectory(studyDefinition);
 
-        StudyRepository studyRepository = new StudyRepository(tempRepositoryDirectory, gitHandler, preferencesService, new DummyFileUpdateMonitor(), savePreferences, timestampPreferences, entryTypesManager);
+        StudyRepository studyRepository = new StudyRepository(tempRepositoryDirectory, gitHandler, preferencesService, new DummyFileUpdateMonitor(), entryTypesManager);
         StudyDatabaseToFetcherConverter converter = new StudyDatabaseToFetcherConverter(studyRepository.getActiveLibraryEntries(), preferencesService);
         List<SearchBasedFetcher> result = converter.getActiveFetchers();
 

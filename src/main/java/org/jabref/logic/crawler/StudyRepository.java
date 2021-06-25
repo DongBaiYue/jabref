@@ -14,11 +14,9 @@ import org.jabref.logic.citationkeypattern.CitationKeyGenerator;
 import org.jabref.logic.crawler.git.GitHandler;
 import org.jabref.logic.database.DatabaseMerger;
 import org.jabref.logic.exporter.BibtexDatabaseWriter;
-import org.jabref.logic.exporter.SavePreferences;
 import org.jabref.logic.importer.OpenDatabase;
 import org.jabref.logic.importer.ParseException;
 import org.jabref.logic.importer.SearchBasedFetcher;
-import org.jabref.logic.preferences.TimestampPreferences;
 import org.jabref.model.database.BibDatabase;
 import org.jabref.model.database.BibDatabaseContext;
 import org.jabref.model.entry.BibEntryTypesManager;
@@ -54,8 +52,6 @@ class StudyRepository {
     private final Study study;
     private final PreferencesService preferencesService;
     private final FileUpdateMonitor fileUpdateMonitor;
-    private final SavePreferences savePreferences;
-    private final TimestampPreferences timestampPreferences;
     private final BibEntryTypesManager bibEntryTypesManager;
 
     /**
@@ -73,8 +69,6 @@ class StudyRepository {
                            GitHandler gitHandler,
                            PreferencesService preferencesService,
                            FileUpdateMonitor fileUpdateMonitor,
-                           SavePreferences savePreferences,
-                           TimestampPreferences timestampPreferences,
                            BibEntryTypesManager bibEntryTypesManager) throws IOException, ParseException {
         this.repositoryPath = pathToRepository;
         this.gitHandler = gitHandler;
@@ -86,8 +80,6 @@ class StudyRepository {
         this.preferencesService = preferencesService;
         this.fileUpdateMonitor = fileUpdateMonitor;
         this.studyDefinitionFile = Path.of(repositoryPath.toString(), STUDY_DEFINITION_FILE_NAME);
-        this.savePreferences = savePreferences;
-        this.timestampPreferences = timestampPreferences;
         this.bibEntryTypesManager = bibEntryTypesManager;
 
         if (Files.notExists(repositoryPath)) {
@@ -103,21 +95,21 @@ class StudyRepository {
      * Returns entries stored in the repository for a certain query and fetcher
      */
     public BibDatabaseContext getFetcherResultEntries(String query, String fetcherName) throws IOException {
-        return OpenDatabase.loadDatabase(getPathToFetcherResultFile(query, fetcherName), preferencesService, timestampPreferences, fileUpdateMonitor).getDatabaseContext();
+        return OpenDatabase.loadDatabase(getPathToFetcherResultFile(query, fetcherName), preferencesService, fileUpdateMonitor).getDatabaseContext();
     }
 
     /**
      * Returns the merged entries stored in the repository for a certain query
      */
     public BibDatabaseContext getQueryResultEntries(String query) throws IOException {
-        return OpenDatabase.loadDatabase(getPathToQueryResultFile(query), preferencesService, timestampPreferences, fileUpdateMonitor).getDatabaseContext();
+        return OpenDatabase.loadDatabase(getPathToQueryResultFile(query), preferencesService, fileUpdateMonitor).getDatabaseContext();
     }
 
     /**
      * Returns the merged entries stored in the repository for all queries
      */
     public BibDatabaseContext getStudyResultEntries() throws IOException {
-        return OpenDatabase.loadDatabase(getPathToStudyResultFile(), preferencesService, timestampPreferences, fileUpdateMonitor).getDatabaseContext();
+        return OpenDatabase.loadDatabase(getPathToStudyResultFile(), preferencesService, fileUpdateMonitor).getDatabaseContext();
     }
 
     /**
@@ -318,13 +310,13 @@ class StudyRepository {
     }
 
     private void generateCiteKeys(BibDatabaseContext existingEntries, BibDatabase targetEntries) {
-        CitationKeyGenerator citationKeyGenerator = new CitationKeyGenerator(existingEntries, savePreferences.getCitationKeyPatternPreferences());
+        CitationKeyGenerator citationKeyGenerator = new CitationKeyGenerator(existingEntries, preferencesService.getSavePreferences().getCitationKeyPatternPreferences());
         targetEntries.getEntries().stream().filter(bibEntry -> !bibEntry.hasCitationKey()).forEach(citationKeyGenerator::generateAndSetKey);
     }
 
     private void writeResultToFile(Path pathToFile, BibDatabase entries) throws IOException {
         try (Writer fileWriter = new FileWriter(pathToFile.toFile())) {
-            BibtexDatabaseWriter databaseWriter = new BibtexDatabaseWriter(fileWriter, savePreferences, bibEntryTypesManager);
+            BibtexDatabaseWriter databaseWriter = new BibtexDatabaseWriter(fileWriter, preferencesService.getSavePreferences(), bibEntryTypesManager);
             databaseWriter.saveDatabase(new BibDatabaseContext(entries));
         }
     }

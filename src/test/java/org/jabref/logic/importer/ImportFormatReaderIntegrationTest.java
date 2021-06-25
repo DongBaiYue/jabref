@@ -7,9 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Stream;
 
-import org.jabref.logic.preferences.TimestampPreferences;
 import org.jabref.logic.xmp.XmpPreferences;
-import org.jabref.model.entry.field.StandardField;
 import org.jabref.model.util.DummyFileUpdateMonitor;
 import org.jabref.preferences.PreferencesService;
 
@@ -25,14 +23,12 @@ import static org.mockito.Mockito.when;
 class ImportFormatReaderIntegrationTest {
 
     private ImportFormatReader reader;
-    private final TimestampPreferences timestampPreferences = mock(TimestampPreferences.class);
 
     @BeforeEach
     void setUp() {
         reader = new ImportFormatReader();
         PreferencesService preferencesService = mock(PreferencesService.class, Answers.RETURNS_DEEP_STUBS);
         when(preferencesService.getDefaultEncoding()).thenReturn(StandardCharsets.UTF_8);
-        when(timestampPreferences.getTimestampField()).then(invocation -> StandardField.TIMESTAMP);
         reader.resetImportFormats(preferencesService, mock(XmpPreferences.class), new DummyFileUpdateMonitor());
     }
 
@@ -40,7 +36,7 @@ class ImportFormatReaderIntegrationTest {
     @MethodSource("importFormats")
     void testImportUnknownFormat(String resource, String format, int count) throws Exception {
         Path file = Path.of(ImportFormatReaderIntegrationTest.class.getResource(resource).toURI());
-        ImportFormatReader.UnknownFormatImport unknownFormat = reader.importUnknownFormat(file, timestampPreferences, new DummyFileUpdateMonitor());
+        ImportFormatReader.UnknownFormatImport unknownFormat = reader.importUnknownFormat(file, new DummyFileUpdateMonitor());
         assertEquals(count, unknownFormat.parserResult.getDatabase().getEntryCount());
     }
 
