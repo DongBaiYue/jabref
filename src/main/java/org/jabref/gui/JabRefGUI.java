@@ -274,7 +274,7 @@ public class JabRefGUI {
             }
 
             ParserResult parsedDatabase = OpenDatabase.loadDatabase(fileName,
-                    Globals.prefs.getImportFormatPreferences(), Globals.prefs.getTimestampPreferences(), Globals.getFileUpdateMonitor());
+                    Globals.prefs, Globals.prefs.getTimestampPreferences(), Globals.getFileUpdateMonitor());
 
             if (parsedDatabase.isEmpty()) {
                 LOGGER.error(Localization.lang("Error opening file") + " '" + dbFile.getPath() + "'");

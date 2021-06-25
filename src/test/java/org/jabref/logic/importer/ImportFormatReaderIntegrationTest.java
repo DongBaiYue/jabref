@@ -11,6 +11,7 @@ import org.jabref.logic.preferences.TimestampPreferences;
 import org.jabref.logic.xmp.XmpPreferences;
 import org.jabref.model.entry.field.StandardField;
 import org.jabref.model.util.DummyFileUpdateMonitor;
+import org.jabref.preferences.PreferencesService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,15 +25,15 @@ import static org.mockito.Mockito.when;
 class ImportFormatReaderIntegrationTest {
 
     private ImportFormatReader reader;
-    private TimestampPreferences timestampPreferences = mock(TimestampPreferences.class);
+    private final TimestampPreferences timestampPreferences = mock(TimestampPreferences.class);
 
     @BeforeEach
     void setUp() {
         reader = new ImportFormatReader();
-        ImportFormatPreferences importFormatPreferences = mock(ImportFormatPreferences.class, Answers.RETURNS_DEEP_STUBS);
-        when(importFormatPreferences.getEncoding()).thenReturn(StandardCharsets.UTF_8);
+        PreferencesService preferencesService = mock(PreferencesService.class, Answers.RETURNS_DEEP_STUBS);
+        when(preferencesService.getDefaultEncoding()).thenReturn(StandardCharsets.UTF_8);
         when(timestampPreferences.getTimestampField()).then(invocation -> StandardField.TIMESTAMP);
-        reader.resetImportFormats(importFormatPreferences, mock(XmpPreferences.class), new DummyFileUpdateMonitor());
+        reader.resetImportFormats(preferencesService, mock(XmpPreferences.class), new DummyFileUpdateMonitor());
     }
 
     @ParameterizedTest
@@ -54,7 +55,7 @@ class ImportFormatReaderIntegrationTest {
     @MethodSource("importFormats")
     void testImportUnknownFormatFromString(String resource, String format, int count) throws Exception {
         Path file = Path.of(ImportFormatReaderIntegrationTest.class.getResource(resource).toURI());
-        String data = new String(Files.readAllBytes(file), StandardCharsets.UTF_8);
+        String data = Files.readString(file);
         assertEquals(count, reader.importUnknownFormat(data).parserResult.getDatabase().getEntries().size());
     }
 

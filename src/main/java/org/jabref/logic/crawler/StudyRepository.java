@@ -15,7 +15,6 @@ import org.jabref.logic.crawler.git.GitHandler;
 import org.jabref.logic.database.DatabaseMerger;
 import org.jabref.logic.exporter.BibtexDatabaseWriter;
 import org.jabref.logic.exporter.SavePreferences;
-import org.jabref.logic.importer.ImportFormatPreferences;
 import org.jabref.logic.importer.OpenDatabase;
 import org.jabref.logic.importer.ParseException;
 import org.jabref.logic.importer.SearchBasedFetcher;
@@ -29,6 +28,7 @@ import org.jabref.model.study.Study;
 import org.jabref.model.study.StudyDatabase;
 import org.jabref.model.study.StudyQuery;
 import org.jabref.model.util.FileUpdateMonitor;
+import org.jabref.preferences.PreferencesService;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
@@ -52,7 +52,7 @@ class StudyRepository {
     private final Path studyDefinitionFile;
     private final GitHandler gitHandler;
     private final Study study;
-    private final ImportFormatPreferences importFormatPreferences;
+    private final PreferencesService preferencesService;
     private final FileUpdateMonitor fileUpdateMonitor;
     private final SavePreferences savePreferences;
     private final TimestampPreferences timestampPreferences;
@@ -71,7 +71,7 @@ class StudyRepository {
      */
     public StudyRepository(Path pathToRepository,
                            GitHandler gitHandler,
-                           ImportFormatPreferences importFormatPreferences,
+                           PreferencesService preferencesService,
                            FileUpdateMonitor fileUpdateMonitor,
                            SavePreferences savePreferences,
                            TimestampPreferences timestampPreferences,
@@ -83,7 +83,7 @@ class StudyRepository {
         } catch (GitAPIException e) {
             LOGGER.error("Updating repository from remote failed");
         }
-        this.importFormatPreferences = importFormatPreferences;
+        this.preferencesService = preferencesService;
         this.fileUpdateMonitor = fileUpdateMonitor;
         this.studyDefinitionFile = Path.of(repositoryPath.toString(), STUDY_DEFINITION_FILE_NAME);
         this.savePreferences = savePreferences;
@@ -103,21 +103,21 @@ class StudyRepository {
      * Returns entries stored in the repository for a certain query and fetcher
      */
     public BibDatabaseContext getFetcherResultEntries(String query, String fetcherName) throws IOException {
-        return OpenDatabase.loadDatabase(getPathToFetcherResultFile(query, fetcherName), importFormatPreferences, timestampPreferences, fileUpdateMonitor).getDatabaseContext();
+        return OpenDatabase.loadDatabase(getPathToFetcherResultFile(query, fetcherName), preferencesService, timestampPreferences, fileUpdateMonitor).getDatabaseContext();
     }
 
     /**
      * Returns the merged entries stored in the repository for a certain query
      */
     public BibDatabaseContext getQueryResultEntries(String query) throws IOException {
-        return OpenDatabase.loadDatabase(getPathToQueryResultFile(query), importFormatPreferences, timestampPreferences, fileUpdateMonitor).getDatabaseContext();
+        return OpenDatabase.loadDatabase(getPathToQueryResultFile(query), preferencesService, timestampPreferences, fileUpdateMonitor).getDatabaseContext();
     }
 
     /**
      * Returns the merged entries stored in the repository for all queries
      */
     public BibDatabaseContext getStudyResultEntries() throws IOException {
-        return OpenDatabase.loadDatabase(getPathToStudyResultFile(), importFormatPreferences, timestampPreferences, fileUpdateMonitor).getDatabaseContext();
+        return OpenDatabase.loadDatabase(getPathToStudyResultFile(), preferencesService, timestampPreferences, fileUpdateMonitor).getDatabaseContext();
     }
 
     /**
@@ -185,7 +185,7 @@ class StudyRepository {
      */
     private void setUpRepositoryStructure() throws IOException {
         // Cannot use stream here since IOException has to be thrown
-        StudyDatabaseToFetcherConverter converter = new StudyDatabaseToFetcherConverter(this.getActiveLibraryEntries(), importFormatPreferences);
+        StudyDatabaseToFetcherConverter converter = new StudyDatabaseToFetcherConverter(this.getActiveLibraryEntries(), preferencesService);
         for (String query : this.getSearchQueryStrings()) {
             createQueryResultFolder(query);
             converter.getActiveFetchers()
@@ -281,7 +281,7 @@ class StudyRepository {
      * @param crawlResults The results that shall be persisted.
      */
     private void persistResults(List<QueryResult> crawlResults) throws IOException {
-        DatabaseMerger merger = new DatabaseMerger(importFormatPreferences.getKeywordSeparator());
+        DatabaseMerger merger = new DatabaseMerger(preferencesService.getKeywordDelimiter());
         BibDatabase newStudyResultEntries = new BibDatabase();
 
         for (QueryResult result : crawlResults) {
