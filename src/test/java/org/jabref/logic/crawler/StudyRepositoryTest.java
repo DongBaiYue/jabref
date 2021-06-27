@@ -80,6 +80,8 @@ class StudyRepositoryTest {
         when(savePreferences.getEncoding()).thenReturn(null);
         when(savePreferences.takeMetadataSaveOrderInAccount()).thenReturn(true);
         when(savePreferences.getCitationKeyPatternPreferences()).thenReturn(citationKeyPatternPreferences);
+        when(preferencesService.getSavePreferences()).thenReturn(savePreferences);
+        when(preferencesService.getTimestampPreferences()).thenReturn(timestampPreferences);
         when(preferencesService.getKeywordDelimiter()).thenReturn(',');
         when(preferencesService.getFieldContentFormatterPreferences()).thenReturn(new FieldContentFormatterPreferences());
         when(preferencesService.getSpecialFieldsPreferences().isKeywordSyncEnabled()).thenReturn(false);
